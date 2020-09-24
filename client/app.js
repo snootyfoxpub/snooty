@@ -78,6 +78,7 @@ function processCallback(name, data) {
     actions.forEach(({ command, attributes }) => {
       switch (command) {
         case 'dom': domAction(attributes); break;
+        case 'refresh': location.reload(); break;
       }
     });
   };
