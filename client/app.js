@@ -9,29 +9,7 @@ $(function() {
       e.stopPropagation();
       return;
     }
-
   });
-
-  $('#modalEditor').on('show.bs.modal', function (event) {
-    const target = $(event.relatedTarget);
-
-    $('#modalEditorLabel').text(target.attr('modal-title'));
-    $('#modalEditorValue').val(target.attr('modal-value'));
-    $('#modalEditorSave').attr('data-target', target.attr('id'));
-  });
-
-  $('#modalEditorSave').click(function (e) {
-    const target = $('#' + $(e.target).attr('data-target'));
-    const value = $('#modalEditorValue').val().trim();
-
-    if (value)
-      target.addClass('font-weight-bold');
-    else
-      target.removeClass('font-weight-bold');
-
-    target.attr({ 'modal-value': value });
-  });
-
 });
 
 
@@ -79,6 +57,12 @@ function processCallback(name, data) {
       switch (command) {
         case 'dom': domAction(attributes); break;
         case 'refresh': location.reload(); break;
+        case 'showModal':
+          $('#modalHeader').html(attributes.header);
+          $('#modalBody').html(attributes.body);
+          $('#modalWindow').modal('show');
+          break;
+        case 'hideModal': $('#modalWindow').modal('hide');
       }
     });
   };
