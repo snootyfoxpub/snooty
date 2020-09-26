@@ -12,6 +12,7 @@ $(function() {
   });
 
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
+
 });
 
 
