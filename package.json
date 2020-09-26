@@ -1,6 +1,6 @@
 {
   "name": "@snooty/snooty",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Express extension framework",
   "main": "index.js",
   "author": "Mikhail Kostryukov <mike@triptrack.net>",
