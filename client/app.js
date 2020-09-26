@@ -10,6 +10,8 @@ $(function() {
       return;
     }
   });
+
+  $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
 });
 
 
@@ -58,8 +60,9 @@ function processCallback(name, data) {
         case 'dom': domAction(attributes); break;
         case 'refresh': location.reload(); break;
         case 'showModal':
-          $('#modalHeader').html(attributes.header);
+          $('#modalTitle').html(attributes.title);
           $('#modalBody').html(attributes.body);
+          $('#modalFooter').html(attributes.footer);
           $('#modalWindow').modal('show');
           break;
         case 'hideModal': $('#modalWindow').modal('hide');
