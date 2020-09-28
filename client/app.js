@@ -13,11 +13,36 @@ $(function() {
 
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
 
+  // Handle Enter button modal form
   $('#modalWindow').on('keypress', e => {
     if (e.which == 13) {
       $('[default]').trigger('click');
       e.stopPropagation();
     }
+  });
+
+  // Handle file uploads
+
+  $('input[type=file]').on('change', e => {
+    const el = $(e.target);
+    const name = el.prop('name')
+    const files = el.prop('files');
+    const fd = new FormData();
+    const path = window.location.pathname + '/upload/' + name;
+
+    fd.append('file', files[0]);
+    fd.append('field', $(e.target).prop('name'));
+
+    $.ajax({
+        url: path,
+        data: fd,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (data) {
+          el.attr('uploaded', JSON.stringify(data));
+        }
+    });
   });
 });
 
@@ -29,20 +54,24 @@ function processAction(el) {
 
   const inputs = {};
 
-  if (!element.attr('action-simple'))
-    $('input, select').each((index, el) => {
-      if (el.disabled) return;
-      if (['checkbox', 'radio'].includes(el.type) && !el.checked) return;
+  if (!element.attr('action-simple')) {
+    $('input, select, textarea').each((index, el) => {
+      const type = el.getAttribute('type');
+      const name = el.getAttribute('name');
 
-      const parts = el.name.split('.');
+      if (!name) return;
+      if (['checkbox', 'radio'].includes(type) && !el.checked) return;
+
+      const parts = name.split('.');
       const field = parts.pop();
       let pos = inputs;
       parts.forEach((key, index) => {
         pos = pos[key] = pos[key] || {};
       });
 
-      pos[field] = el.value;
+      pos[field] = type === 'file' ? el.getAttribute('uploaded') : el.value;
     });
+  }
 
   processCallback(callback, { inputs, data });
 }
