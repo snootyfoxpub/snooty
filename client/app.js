@@ -30,8 +30,11 @@ function processAction(el) {
   const inputs = {};
 
   if (!element.attr('action-simple'))
-    $('input').each((index, el) => {
-      const parts = el.getAttribute('name').split('.');
+    $('input, select').each((index, el) => {
+      if (el.disabled) return;
+      if (['checkbox', 'radio'].includes(el.type) && !el.checked) return;
+
+      const parts = el.name.split('.');
       const field = parts.pop();
       let pos = inputs;
       parts.forEach((key, index) => {
