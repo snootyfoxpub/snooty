@@ -46,8 +46,43 @@ $(function() {
         }
     });
   });
+
+  animateAutocompletes();
 });
 
+function animateAutocompletes() {
+  const selector = '[data-behaviour="autocomplete"]';
+  activateForChildren(document);
+
+  let observer = new MutationObserver(mutations => {
+    for (let mutation of mutations) {
+      for (let node of mutation.addedNodes) {
+        if (!(node instanceof HTMLElement)) continue;
+
+        if (node.matches(selector)) activateAutocomplete(node);
+        else activateForChildren(node);
+      }
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  function activateForChildren(node) {
+    for (let child of node.querySelectorAll(selector))
+      activateAutocomplete(child);
+  }
+
+  function activateAutocomplete(node) {
+    const callback  = (node.dataset || {}).callback;
+    const url = [window.location.pathname, 'callback', callback].join('/');
+
+    $(node).autoComplete({ resolverSettings: {
+      method: 'post',
+      url: url,
+      queryKey: 'data'
+    }});
+  }
+}
 
 function processAction(el) {
   const element = $(el);
