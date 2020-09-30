@@ -30,7 +30,9 @@ $(function() {
     const fd = new FormData();
     const path = window.location.pathname + '/upload/' + name;
 
-    fd.append('file', files[0]);
+    for (let i = 0; i < files.length; i++)
+      fd.append('files', files[i]);
+
     fd.append('field', $(e.target).prop('name'));
 
     $.ajax({
