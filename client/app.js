@@ -84,7 +84,7 @@ function processCallback(name, data) {
   $.ajax({
       type: "POST",
       url: path,
-      data: JSON.stringify({ data }),
+      data: JSON.stringify(data),
       contentType: "application/json; charset=utf-8",
       dataType: "json",
       success: processAnswer,
