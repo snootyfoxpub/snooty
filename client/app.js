@@ -76,11 +76,21 @@ function animateAutocompletes() {
     const callback  = (node.dataset || {}).callback;
     const url = [window.location.pathname, 'callback', callback].join('/');
 
-    $(node).autoComplete({ resolverSettings: {
+    // See https://github.com/xcash/bootstrap-autocomplete/issues/5
+    // FIXME: this is very retarded thing to do, component should do this
+    // itself
+    const selected = node.matches('select') && node.querySelector('[selected]');
+
+    const $node = $(node);
+
+    $node.autoComplete({ resolverSettings: {
       method: 'post',
       url: url,
       queryKey: 'data'
     }});
+
+    if (selected)
+      $node.autoComplete('set', { value: selected.value, text: selected.text });
   }
 }
 
