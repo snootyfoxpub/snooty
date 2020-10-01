@@ -76,11 +76,14 @@ function animateAutocompletes() {
     const callback  = (node.dataset || {}).callback;
     const url = [window.location.pathname, 'callback', callback].join('/');
 
-    $(node).autoComplete({ resolverSettings: {
-      method: 'post',
-      url: url,
-      queryKey: 'data'
-    }});
+    $(node).autoComplete({
+      resolverSettings: {
+        method: 'post',
+        url: url,
+        queryKey: 'data'
+      },
+      minLength: 0
+    });
   }
 }
 
