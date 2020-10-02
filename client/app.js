@@ -33,7 +33,7 @@ $(function() {
     for (let i = 0; i < files.length; i++)
       fd.append('files', files[i]);
 
-    fd.append('field', $(e.target).prop('name'));
+    fd.append('field', name);
 
     $.ajax({
         url: path,
@@ -43,6 +43,7 @@ $(function() {
         type: 'POST',
         success: function (data) {
           el.attr('uploaded', JSON.stringify(data));
+          $('#' + name + '-label').html('Загружено файлов: ' + files.length);
         }
     });
   });
