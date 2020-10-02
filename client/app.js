@@ -48,6 +48,43 @@ $(function() {
   });
 
   animateAutocompletes();
+  /// FIXME: !!!!!!!
+  const datasource = {
+    getRows(params) {
+      console.log(JSON.stringify(params.request, null, 1));
+        fetch(window.location.pathname + '/callback/gridData', {
+          method: 'post',
+          body: JSON.stringify({
+            data: { start: params.startRow, end: params.endRow }
+         }),
+          headers: {"Content-Type": "application/json; charset=utf-8"}
+        })
+        .then(httpResponse => httpResponse.json())
+        .then(response => {
+          params.successCallback(response.rows, response.lastRow);
+        })
+        .catch(error => {
+          console.error(error);
+          params.failCallback();
+        })
+      }
+  };
+
+  const gridDiv = document.querySelector('#grid');
+
+  if (gridDiv) {
+    const gridOptions = {
+      rowModelType: 'infinite',
+      datasource: datasource,
+      columnDefs: JSON.parse($(gridDiv).attr('grid-definition')).columns,
+      rowSelection: 'multiple',
+      defaultColDef: {
+          sortable: true
+      }
+    };
+
+    new agGrid.Grid(gridDiv, gridOptions);
+  }
 });
 
 function animateAutocompletes() {
