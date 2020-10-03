@@ -73,10 +73,14 @@ function animateAutocompletes() {
   }
 
   function activateAutocomplete(node) {
+    let $node = $(node);
+    if ($node.data('autoComplete')) return; // Already initialized
+
     const callback  = (node.dataset || {}).callback;
     const url = [window.location.pathname, 'callback', callback].join('/');
 
-    $(node).autoComplete({
+
+    $node.autoComplete({
       resolverSettings: {
         method: 'post',
         url: url,
