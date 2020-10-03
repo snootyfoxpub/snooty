@@ -91,6 +91,14 @@ function animateAutocompletes() {
         searchPre: collectExtraData,
       }
     });
+
+    if (!node.parentElement) {
+      // This is a select replaced by search field
+      // Update $node to reflect the actual element
+      if (node.id) $node = $('#' + node.id);
+      else $node = $('[name="' + node.name + '"]:hidden').prev();
+    }
+    $node.on('focus', () => $node.autoComplete('show'));
   }
 
   function collectExtraData(text, input) {
