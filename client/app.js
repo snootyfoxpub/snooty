@@ -110,17 +110,42 @@ function animateAutocompletes() {
   }
 
   function activateAutocomplete(node) {
+    let $node = $(node);
+    if ($node.data('autoComplete')) return; // Already initialized
+
     const callback  = (node.dataset || {}).callback;
     const url = [window.location.pathname, 'callback', callback].join('/');
 
-    $(node).autoComplete({
+
+    $node.autoComplete({
       resolverSettings: {
         method: 'post',
         url: url,
         queryKey: 'data'
       },
-      minLength: 0
+      minLength: 0,
+      events: {
+        searchPre: collectExtraData,
+      }
     });
+
+    if (!node.parentElement) {
+      // This is a select replaced by search field
+      // Update $node to reflect the actual element
+      if (node.id) $node = $('#' + node.id);
+      else $node = $('[name="' + node.name + '"]:hidden').prev();
+    }
+    $node.on('focus', () => $node.autoComplete('show'));
+  }
+
+  function collectExtraData(text, input) {
+    const autocomplete = input.data('autoComplete');
+    if (!autocomplete) return text;
+
+    const settings = autocomplete.resolver._settings;
+    settings.extraData = { inputs: serializeInputs() };
+
+    return text;
   }
 }
 
@@ -129,28 +154,32 @@ function processAction(el) {
   const callback = element.attr('action');
   const data = element.attr('action-data');
 
-  const inputs = {};
-
-  if (!element.attr('action-simple')) {
-    $('input, select, textarea').each((index, el) => {
-      const type = el.getAttribute('type');
-      const name = el.getAttribute('name');
-
-      if (!name) return;
-      if (['checkbox', 'radio'].includes(type) && !el.checked) return;
-
-      const parts = name.split('.');
-      const field = parts.pop();
-      let pos = inputs;
-      parts.forEach((key, index) => {
-        pos = pos[key] = pos[key] || {};
-      });
-
-      pos[field] = type === 'file' ? el.getAttribute('uploaded') : el.value;
-    });
-  }
+  const inputs = element.attr('action-simple') ? {} : serializeInputs();
 
   processCallback(callback, { inputs, data });
+}
+
+function serializeInputs() {
+  const inputs = {};
+
+  $('input, select, textarea').each((index, el) => {
+    const type = el.getAttribute('type');
+    const name = el.getAttribute('name');
+
+    if (!name) return;
+    if (['checkbox', 'radio'].includes(type) && !el.checked) return;
+
+    const parts = name.split('.');
+    const field = parts.pop();
+    let pos = inputs;
+    parts.forEach((key, index) => {
+      pos = pos[key] = pos[key] || {};
+    });
+
+    pos[field] = type === 'file' ? el.getAttribute('uploaded') : el.value;
+  });
+
+  return inputs;
 }
 
 function processCallback(name, data) {
