@@ -11,6 +11,8 @@ $(function() {
     }
   });
 
+  $(document).on('change', '[data-change]', processOnChange);
+
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
 
   // Handle Enter button modal form
@@ -48,6 +50,7 @@ $(function() {
   });
 
   animateAutocompletes();
+
   /// FIXME: !!!!!!!
   const datasource = {
     getRows(params) {
@@ -84,6 +87,16 @@ $(function() {
     };
 
     new agGrid.Grid(gridDiv, gridOptions);
+  }
+
+  function processOnChange(evt) {
+    const $el = $(evt.target);
+    const handler = $el.data('change');
+
+    const data = handler.data || {};
+    const inputs = handler.withInputs ? serializeInputs() : {};
+
+    processCallback(handler.callback, { inputs, data });
   }
 });
 
