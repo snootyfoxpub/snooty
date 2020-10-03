@@ -86,8 +86,21 @@ function animateAutocompletes() {
         url: url,
         queryKey: 'data'
       },
-      minLength: 0
+      minLength: 0,
+      events: {
+        searchPre: collectExtraData,
+      }
     });
+  }
+
+  function collectExtraData(text, input) {
+    const autocomplete = input.data('autoComplete');
+    if (!autocomplete) return text;
+
+    const settings = autocomplete.resolver._settings;
+    settings.extraData = { inputs: serializeInputs() };
+
+    return text;
   }
 }
 
