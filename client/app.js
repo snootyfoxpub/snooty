@@ -96,28 +96,32 @@ function processAction(el) {
   const callback = element.attr('action');
   const data = element.attr('action-data');
 
-  const inputs = {};
-
-  if (!element.attr('action-simple')) {
-    $('input, select, textarea').each((index, el) => {
-      const type = el.getAttribute('type');
-      const name = el.getAttribute('name');
-
-      if (!name) return;
-      if (['checkbox', 'radio'].includes(type) && !el.checked) return;
-
-      const parts = name.split('.');
-      const field = parts.pop();
-      let pos = inputs;
-      parts.forEach((key, index) => {
-        pos = pos[key] = pos[key] || {};
-      });
-
-      pos[field] = type === 'file' ? el.getAttribute('uploaded') : el.value;
-    });
-  }
+  const inputs = element.attr('action-simple') ? {} : serializeInputs();
 
   processCallback(callback, { inputs, data });
+}
+
+function serializeInputs() {
+  const inputs = {};
+
+  $('input, select, textarea').each((index, el) => {
+    const type = el.getAttribute('type');
+    const name = el.getAttribute('name');
+
+    if (!name) return;
+    if (['checkbox', 'radio'].includes(type) && !el.checked) return;
+
+    const parts = name.split('.');
+    const field = parts.pop();
+    let pos = inputs;
+    parts.forEach((key, index) => {
+      pos = pos[key] = pos[key] || {};
+    });
+
+    pos[field] = type === 'file' ? el.getAttribute('uploaded') : el.value;
+  });
+
+  return inputs;
 }
 
 function processCallback(name, data) {
