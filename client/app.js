@@ -54,15 +54,25 @@ $(function() {
   });
 
   animateAutocompletes();
+  initGrid();
 
   /// FIXME: !!!!!!!
-  const datasource = {
-    getRows(params) {
-      console.log(JSON.stringify(params.request, null, 1));
+
+  function initGrid() {
+    const gridDiv = document.querySelector('#grid');
+
+    if (!gridDiv) return;
+
+    const datasource = {
+      getRows(params) {
         fetch(window.location.pathname + '/callback/gridData', {
           method: 'post',
           body: JSON.stringify({
-            data: { start: params.startRow, end: params.endRow }
+            data: {
+              start: params.startRow,
+              end: params.endRow,
+              sort: params.sortModel
+            }
          }),
           headers: {"Content-Type": "application/json; charset=utf-8"}
         })
@@ -75,20 +85,35 @@ $(function() {
           params.failCallback();
         })
       }
-  };
+    };
 
-  const gridDiv = document.querySelector('#grid');
+    const gridDefinition = JSON.parse($(gridDiv).attr('grid-definition') || '{}');
 
-  if (gridDiv) {
     const gridOptions = {
       rowModelType: 'infinite',
       datasource: datasource,
-      columnDefs: JSON.parse($(gridDiv).attr('grid-definition')).columns,
+      getRowHeight: getRowHeight,
       rowSelection: 'multiple',
+      getRowStyle: getRowStyle,
       defaultColDef: {
           sortable: true
       }
     };
+
+    Object.keys(gridDefinition).forEach(key => {
+      gridOptions[key] = gridDefinition[key];
+    });
+
+    const columnDefs = gridDefinition.columnDefs;
+
+    columnDefs.forEach(column => {
+      if (column.cellRenderer)
+        column.cellRenderer = eval(column.cellRenderer);
+      if (column.rowSpan)
+        column.rowSpan = eval(column.rowSpan);
+      if (column.colSpan)
+        column.colSpan = eval(column.colSpan);
+    });
 
     new agGrid.Grid(gridDiv, gridOptions);
   }
@@ -103,6 +128,29 @@ $(function() {
     processCallback(handler.callback, { inputs, data });
   }
 });
+
+function spanTo5(params) {
+  return (params.data || {}).isReason ? 7 : 1;
+}
+
+function getRowHeight(params) {
+  return 50;
+}
+
+function trustHtml(params) {
+  return params.value ? params.value : '';
+}
+
+function multirowText(params) {
+  const value = params.value ? params.value : '';
+  return value.split('\n').join('<br/>');
+}
+
+function getRowStyle(params) {
+  if (!params.data) return;
+  if (!params.data.isLast) return;
+  return { 'border-bottom': 'solid #cccccc 2px' };
+}
 
 function animateAutocompletes() {
   const selector = '[data-behaviour="autocomplete"]';
