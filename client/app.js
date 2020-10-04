@@ -11,6 +11,9 @@ $(function() {
     }
   });
 
+  // Set default language for datepicker
+  $.fn.datepicker.defaults.language = 'ru';
+
   $(document).on('change', '[data-change]', processOnChange);
 
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
