@@ -1,3 +1,5 @@
+var gridOptions;
+
 $(function() {
   $(document).click(function(e) {
     var el = e.target;
@@ -71,7 +73,8 @@ $(function() {
             data: {
               start: params.startRow,
               end: params.endRow,
-              sort: params.sortModel
+              sort: params.sortModel,
+              inputs: serializeInputs()
             }
          }),
           headers: {"Content-Type": "application/json; charset=utf-8"}
@@ -89,12 +92,12 @@ $(function() {
 
     const gridDefinition = JSON.parse($(gridDiv).attr('grid-definition') || '{}');
 
-    const gridOptions = {
+    gridOptions = {
       rowModelType: 'infinite',
       datasource: datasource,
-      getRowHeight: getRowHeight,
       rowSelection: 'multiple',
       getRowStyle: getRowStyle,
+      onSelectionChanged: onSelectionChanged,
       defaultColDef: {
           sortable: true
       }
@@ -129,20 +132,26 @@ $(function() {
   }
 });
 
-function spanTo5(params) {
-  return (params.data || {}).isReason ? 7 : 1;
-}
-
-function getRowHeight(params) {
-  return 50;
-}
-
 function trustHtml(params) {
-  return params.value ? params.value : '';
+  return params.value ? params.value.toString() : '';
+}
+
+function onSelectionChanged() {
+  const grid = document.querySelector('#grid');
+
+  const callback = $('#grid').attr('data-selectionChange');
+
+  if (!callback) return;
+
+  processCallback(callback, {
+    grid: {
+      selectedIds: gridOptions.api.getSelectedRows().map(r => r.id)
+    }
+  });
 }
 
 function multirowText(params) {
-  const value = params.value ? params.value : '';
+  const value = params.value ? params.value.toString() : '';
   return value.split('\n').join('<br/>');
 }
 
