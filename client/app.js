@@ -1,5 +1,3 @@
-var gridOptions;
-
 $(function() {
   $(document).click(function(e) {
     var el = e.target;
@@ -56,45 +54,23 @@ $(function() {
   });
 
   animateAutocompletes();
-  initGrid();
+  $('[data-grid]').each((i, el) => attachGrid(el));
 
   /// FIXME: !!!!!!!
 
-  function initGrid() {
-    const gridDiv = document.querySelector('#grid');
+  function attachGrid(gridDiv) {
+    let datasource = gridDiv.dataset.gridSource;
+    let rowModelType;
 
-    if (!gridDiv) return;
+    if (typeof datasource === 'string') {
+      datasource = datasourceFromCallback(datasource);
+      rowModelType = 'infinite';
+    }
 
-    const datasource = {
-      getRows(params) {
-        fetch(window.location.pathname + '/callback/gridData', {
-          method: 'post',
-          body: JSON.stringify({
-            data: {
-              start: params.startRow,
-              end: params.endRow,
-              sort: params.sortModel,
-              inputs: serializeInputs()
-            }
-         }),
-          headers: {"Content-Type": "application/json; charset=utf-8"}
-        })
-        .then(httpResponse => httpResponse.json())
-        .then(response => {
-          params.successCallback(response.rows, response.lastRow);
-        })
-        .catch(error => {
-          console.error(error);
-          params.failCallback();
-        })
-      }
-    };
-
-    const gridDefinition = JSON.parse($(gridDiv).attr('grid-definition') || '{}');
-
+    const gridDefinition = $(gridDiv).data('grid') ||  {};
     gridOptions = {
-      rowModelType: 'infinite',
-      datasource: datasource,
+      rowModelType,
+      datasource,
       rowSelection: 'multiple',
       getRowStyle: getRowStyle,
       onSelectionChanged: onSelectionChanged,
@@ -118,7 +94,49 @@ $(function() {
         column.colSpan = eval(column.colSpan);
     });
 
-    new agGrid.Grid(gridDiv, gridOptions);
+    const grid = new agGrid.Grid(gridDiv, gridOptions);
+    $(gridDiv).data('grid', grid);
+
+    function datasourceFromCallback(cbName) {
+      const url = [window.location.pathname, 'callback', cbName].join('/');
+
+      return {
+        getRows(params) {
+          fetch(url, {
+            method: 'post',
+            body: JSON.stringify({
+              data: {
+                start: params.startRow,
+                end: params.endRow,
+                sort: params.sortModel,
+                inputs: serializeInputs()
+              }
+            }),
+            headers: {"Content-Type": "application/json; charset=utf-8"}
+          })
+            .then(httpResponse => httpResponse.json())
+            .then(response => {
+              params.successCallback(response.rows, response.lastRow);
+            })
+            .catch(error => {
+              console.error(error);
+              params.failCallback();
+            })
+        }
+      };
+    }
+
+    function onSelectionChanged({ api }) {
+      const callback = gridDiv.dataset['selectionChange'];
+      if (!callback) return;
+
+      processCallback(callback, {
+        grid: {
+          selectedIds: api.getSelectedRows().map(r => r.id)
+        }
+      });
+    }
+
   }
 
   function processOnChange(evt) {
@@ -132,22 +150,12 @@ $(function() {
   }
 });
 
-function trustHtml(params) {
-  return params.value ? params.value.toString() : '';
+function gridApi(selector) {
+  return $(selector).data('grid').gridOptions.api;
 }
 
-function onSelectionChanged() {
-  const grid = document.querySelector('#grid');
-
-  const callback = $('#grid').attr('data-selectionChange');
-
-  if (!callback) return;
-
-  processCallback(callback, {
-    grid: {
-      selectedIds: gridOptions.api.getSelectedRows().map(r => r.id)
-    }
-  });
+function trustHtml(params) {
+  return params.value ? params.value.toString() : '';
 }
 
 function multirowText(params) {
