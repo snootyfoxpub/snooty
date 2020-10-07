@@ -68,14 +68,14 @@ $(function() {
     }
 
     const gridDefinition = $(gridDiv).data('grid') ||  {};
-    gridOptions = {
+    const gridOptions = {
       rowModelType,
       datasource,
       rowSelection: 'multiple',
       getRowStyle: getRowStyle,
       onSelectionChanged: onSelectionChanged,
       defaultColDef: {
-          sortable: true
+        sortable: true
       }
     };
 
@@ -130,11 +130,9 @@ $(function() {
       const callback = gridDiv.dataset['selectionChange'];
       if (!callback) return;
 
-      processCallback(callback, {
-        grid: {
-          selectedIds: api.getSelectedRows().map(r => r.id)
-        }
-      });
+      const data = { inputs: serializeInputs(), grids: serializeGrids() };
+
+      processCallback(callback, data);
     }
 
   }
@@ -217,6 +215,7 @@ function animateAutocompletes() {
       if (node.id) $node = $('#' + node.id);
       else $node = $('[name="' + node.name + '"]:hidden').prev();
     }
+
     $node.on('focus', () => $node.autoComplete('show'));
   }
 
@@ -237,8 +236,23 @@ function processAction(el) {
   const data = element.attr('action-data');
 
   const inputs = element.attr('action-simple') ? {} : serializeInputs();
+  const grids = element.attr('action-simple') ? {} : serializeGrids();
 
-  processCallback(callback, { inputs, data });
+  processCallback(callback, { inputs, data, grids });
+}
+
+function serializeGrids() {
+  const grids = {};
+
+  $('[data-grid]').each((i, el) => {
+    const id = $(el).attr('id');
+
+    grids[id] = {
+      selectedIds: gridApi('#' + id).getSelectedRows().map(r => r.id)
+    };
+  });
+
+  return grids;
 }
 
 function serializeInputs() {
