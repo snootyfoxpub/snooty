@@ -238,7 +238,9 @@ function processAction(el) {
   const inputs = element.attr('action-simple') ? {} : serializeInputs();
   const grids = element.attr('action-simple') ? {} : serializeGrids();
 
-  processCallback(callback, { inputs, data, grids });
+  processCallback(callback, {
+    inputs, data, grids,
+    context: $('body').data('context') });
 }
 
 function serializeGrids() {
