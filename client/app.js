@@ -307,7 +307,10 @@ function processCallback(name, data) {
           $('#modalTitle').html(attributes.title);
           $('#modalBody').html(attributes.body);
           $('#modalFooter').html(attributes.footer);
-          $('#modalWindow').modal('show');
+          $('#modalWindow').modal({
+            backdrop: false,
+            show: true
+          });
           break;
         case 'hideModal': $('#modalWindow').modal('hide');
       }
