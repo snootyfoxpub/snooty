@@ -256,10 +256,10 @@ function serializeGrids() {
   const grids = {};
 
   $('[data-grid]').each((i, el) => {
-    const id = $(el).attr('id');
+    const id = el.id;
 
     grids[id] = {
-      selectedIds: gridApi('#' + id).getSelectedRows().map(r => r.id)
+      selectedIds: gridApi(el).getSelectedRows().map(r => r.id)
     };
   });
 
