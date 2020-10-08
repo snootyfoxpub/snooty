@@ -14,7 +14,7 @@ $(function() {
   // Set default language for datepicker
   $.fn.datepicker.defaults.language = 'ru';
 
-  $(document).on('change', '[data-change]', processOnChange);
+  attachListeners('change', 'click');
 
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
 
@@ -137,12 +137,22 @@ $(function() {
 
   }
 
-  function processOnChange(evt) {
-    const $el = $(evt.target);
-    const handler = $el.data('change');
+  function attachListeners(...evts) {
+    evts.forEach(evt => $(document).on(evt, `[data-${evt}]`, function(e) {
+      return processEvent.call(this, evt, e);
+    }));
+  }
+
+  function processEvent(kind, evt) {
+    const $el = $(this);
+
+    const handler = $el.data(kind);
 
     const data = handler.data || {};
     const inputs = handler.withInputs ? serializeInputs() : {};
+
+    // TODO: add support for handler.sync
+    // TODO: add support for grid serialization
 
     processCallback(handler.callback, { inputs, data });
   }
