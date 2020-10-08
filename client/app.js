@@ -71,7 +71,6 @@ $(function() {
     const gridOptions = {
       rowModelType,
       datasource,
-      rowSelection: 'multiple',
       onSelectionChanged: onSelectionChanged,
     };
 
