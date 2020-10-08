@@ -151,11 +151,9 @@ $(function() {
 
     const data = handler.data || {};
     const inputs = handler.withInputs ? serializeInputs() : {};
+    const grids = handler.withGrids ? serializeGrids() : {};
 
-    // TODO: add support for handler.sync
-    // TODO: add support for grid serialization
-
-    processCallback(handler.callback, { inputs, data });
+    processCallback(handler.callback, { data, grids, inputs });
   }
 });
 
