@@ -138,7 +138,7 @@ $(function() {
   }
 
   function attachListeners(...evts) {
-    evts.forEach(evt => $(document).on(evt, `[data-${evt}]`, function(e) {
+    evts.forEach(evt => $(document).on(evt, `[data-on-${evt}]`, function(e) {
       return processEvent.call(this, evt, e);
     }));
   }
@@ -146,7 +146,8 @@ $(function() {
   function processEvent(kind, evt) {
     const $el = $(this);
 
-    const handler = $el.data(kind);
+    const key = 'on' + kind.slice(0, 1).toUpperCase() + kind.slice(1);
+    const handler = $el.data(key);
 
     const data = handler.data || {};
     const inputs = handler.withInputs ? serializeInputs() : {};
