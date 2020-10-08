@@ -71,12 +71,7 @@ $(function() {
     const gridOptions = {
       rowModelType,
       datasource,
-      rowSelection: 'multiple',
-      getRowStyle: getRowStyle,
       onSelectionChanged: onSelectionChanged,
-      defaultColDef: {
-        sortable: true
-      }
     };
 
     Object.keys(gridDefinition).forEach(key => {
@@ -168,12 +163,6 @@ function trustHtml(params) {
 function multirowText(params) {
   const value = params.value ? params.value.toString() : '';
   return value.split('\n').join('<br/>');
-}
-
-function getRowStyle(params) {
-  if (!params.data) return;
-  if (!params.data.isLast) return;
-  return { 'border-bottom': 'solid #cccccc 2px' };
 }
 
 function animateAutocompletes() {
