@@ -58,8 +58,6 @@ $(function() {
   animateAutocompletes();
   $('[data-grid]').each((i, el) => attachGrid(el));
 
-  /// FIXME: !!!!!!!
-
   function attachGrid(gridDiv) {
     let datasource = gridDiv.dataset.gridSource;
     let rowModelType;
@@ -73,8 +71,9 @@ $(function() {
     const gridOptions = {
       rowModelType,
       datasource,
-      onSelectionChanged: onSelectionChanged,
     };
+
+    attachListeners(gridOptions, gridDiv);
 
     Object.keys(gridDefinition).forEach(key => {
       gridOptions[key] = gridDefinition[key];
@@ -123,15 +122,20 @@ $(function() {
       };
     }
 
-    function onSelectionChanged({ api }) {
-      const callback = gridDiv.dataset['selectionChange'];
-      if (!callback) return;
+    function attachListeners(gridConfig, container) {
+      const gridEventNames = Object.values(agGrid.Events);
+      const dataset = container.dataset;
 
-      const data = { inputs: serializeInputs(), grids: serializeGrids() };
+      for (key in dataset) {
+        if (!key.match(/on[A-Z]/)) continue;
 
-      processCallback(callback, data);
+        // transform 'onSelectionChanged' to 'selectionChanged'
+        const eventName = key.slice(2, 3).toLowerCase() + key.slice(3);
+        if (!gridEventNames.includes(eventName)) continue;
+
+        gridConfig[key] = evt => processEvent.call(container, eventName, evt);
+      }
     }
-
   }
 
   function attachListeners(...evts) {
