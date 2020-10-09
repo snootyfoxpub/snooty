@@ -66,6 +66,7 @@ $(function() {
 
     Object.keys(gridDefinition).forEach(key => {
       const val = gridDefinition[key];
+
       if (key === 'idField') gridOptions.getRowNodeId = (row => row[val]);
       else gridOptions[key] = val;
     });
