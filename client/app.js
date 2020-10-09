@@ -1,16 +1,4 @@
 $(function() {
-  $(document).click(function(e) {
-    var el = e.target;
-
-    while (el && !el.getAttribute('action')) el = el.parentElement;
-
-    if (el) {
-      processAction(el);
-      e.stopPropagation();
-      return;
-    }
-  });
-
   // Set default language for datepicker
   $.fn.datepicker.defaults.language = 'ru';
 
@@ -145,10 +133,11 @@ $(function() {
     const handler = $el.data(key);
 
     const data = handler.data || {};
+    const context = handler.withContext ? $('body').data('context') : {}
     const inputs = handler.withInputs ? serializeInputs() : {};
     const grids = handler.withGrids ? serializeGrids() : {};
 
-    processCallback(handler.callback, { data, grids, inputs });
+    processCallback(handler.callback, { data, grids, inputs, context });
   }
 });
 
@@ -226,19 +215,6 @@ function animateAutocompletes() {
 
     return text;
   }
-}
-
-function processAction(el) {
-  const element = $(el);
-  const callback = element.attr('action');
-  const data = element.attr('action-data');
-
-  const inputs = element.attr('action-simple') ? {} : serializeInputs();
-  const grids = element.attr('action-simple') ? {} : serializeGrids();
-
-  processCallback(callback, {
-    inputs, data, grids,
-    context: $('body').data('context') });
 }
 
 function serializeGrids() {
