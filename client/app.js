@@ -218,6 +218,7 @@ function animateAutocompletes() {
         queryKey: 'data'
       },
       minLength: 0,
+      swallowKeys: true,
       events: {
         searchPre: collectExtraData,
       }
