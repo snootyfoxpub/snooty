@@ -14,7 +14,7 @@ $(function() {
   // Set default language for datepicker
   $.fn.datepicker.defaults.language = 'ru';
 
-  $(document).on('change', '[data-change]', processOnChange);
+  attachListeners('change', 'click');
 
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
 
@@ -132,14 +132,23 @@ $(function() {
 
   }
 
-  function processOnChange(evt) {
-    const $el = $(evt.target);
-    const handler = $el.data('change');
+  function attachListeners(...evts) {
+    evts.forEach(evt => $(document).on(evt, `[data-on-${evt}]`, function(e) {
+      return processEvent.call(this, evt, e);
+    }));
+  }
+
+  function processEvent(kind, evt) {
+    const $el = $(this);
+
+    const key = 'on' + kind.slice(0, 1).toUpperCase() + kind.slice(1);
+    const handler = $el.data(key);
 
     const data = handler.data || {};
     const inputs = handler.withInputs ? serializeInputs() : {};
+    const grids = handler.withGrids ? serializeGrids() : {};
 
-    processCallback(handler.callback, { inputs, data });
+    processCallback(handler.callback, { data, grids, inputs });
   }
 });
 
@@ -236,10 +245,10 @@ function serializeGrids() {
   const grids = {};
 
   $('[data-grid]').each((i, el) => {
-    const id = $(el).attr('id');
+    const id = el.id;
 
     grids[id] = {
-      selectedIds: gridApi('#' + id).getSelectedRows().map(r => r.id)
+      selectedIds: gridApi(el).getSelectedRows().map(r => r.id)
     };
   });
 
