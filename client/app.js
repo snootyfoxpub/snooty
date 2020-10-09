@@ -19,6 +19,8 @@ $(function() {
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
 
   // Handle Enter button modal form
+  // TODO: add support for multiple modal forms
+  // TODO: add support outside of modal form
   $('#modalWindow').on('keypress', e => {
     if (e.which == 13) {
       $('[default]').trigger('click');
