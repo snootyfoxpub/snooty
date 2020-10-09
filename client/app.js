@@ -133,10 +133,11 @@ $(function() {
     const handler = $el.data(key);
 
     const data = handler.data || {};
+    const context = handler.withContext ? $('body').data('context') : {}
     const inputs = handler.withInputs ? serializeInputs() : {};
     const grids = handler.withGrids ? serializeGrids() : {};
 
-    processCallback(handler.callback, { data, grids, inputs });
+    processCallback(handler.callback, { data, grids, inputs, context });
   }
 });
 
