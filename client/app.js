@@ -136,10 +136,11 @@ $(function() {
     flagWith(handler, handler.with);
 
     const data = handler.data || {};
+    const context = handler.withContext ? $('body').data('context') : {}
     const inputs = handler.withInputs ? serializeInputs() : {};
     const grids = handler.withGrids ? serializeGrids() : {};
 
-    return processCallback(handler.callback, { data, grids, inputs });
+    return processCallback(handler.callback, { data, grids, inputs, context });
 
     function flagWith(obj, extra) {
       // With is a reserved word
