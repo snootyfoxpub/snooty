@@ -141,14 +141,31 @@ $(function() {
   function processEvent(kind, evt) {
     const $el = $(this);
 
-    const key = 'on' + kind.slice(0, 1).toUpperCase() + kind.slice(1);
+    const key = `on${capitalize(kind)}`;
     const handler = $el.data(key);
+    flagWith(handler, handler.with);
 
     const data = handler.data || {};
     const inputs = handler.withInputs ? serializeInputs() : {};
     const grids = handler.withGrids ? serializeGrids() : {};
 
-    processCallback(handler.callback, { data, grids, inputs });
+    return processCallback(handler.callback, { data, grids, inputs });
+
+    function flagWith(obj, extra) {
+      // With is a reserved word
+      if (!extra) return;
+      if (typeof extra === 'string') extra = extra.split(/,\s*/);
+
+      extra.forEach(flag => (obj[`with${capitalize(flag)}`] = true));
+
+      return obj;
+    }
+  }
+
+  function capitalize(str) {
+    if (!str) return str;
+
+    return str.slice(0, 1).toUpperCase() + str.slice(1);
   }
 });
 
