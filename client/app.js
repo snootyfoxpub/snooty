@@ -59,12 +59,15 @@ $(function() {
     const gridOptions = {
       rowModelType,
       datasource,
+      getRowNodeId: (row => row.id)
     };
 
     attachListeners(gridOptions, gridDiv);
 
     Object.keys(gridDefinition).forEach(key => {
-      gridOptions[key] = gridDefinition[key];
+      const val = gridDefinition[key];
+      if (key === 'idField') gridOptions.getRowNodeId = (row => row[val]);
+      else gridOptions[key] = val;
     });
 
     const columnDefs = gridDefinition.columnDefs;
