@@ -305,7 +305,7 @@ function processCallback(name, data) {
           $('#modalBody').html(attributes.body);
           $('#modalFooter').html(attributes.footer);
           $('#modalWindow').modal({
-            backdrop: false,
+            backdrop: 'static',
             show: true
           });
           break;
