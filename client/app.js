@@ -145,12 +145,13 @@ $(function() {
 
     const data = handler.data || {};
     const origin = $el.attr('id');
+    const gridEvent = evt.api && serializeGridEventData(evt);
     const context = handler.withContext ? $('body').data('context') : {}
     const inputs = handler.withInputs ? serializeInputs() : {};
     const grids = handler.withGrids ? serializeGrids() : {};
 
     return processCallback(handler.callback, {
-      data, grids, inputs, context, origin
+      data, grids, inputs, context, origin, gridEvent
     });
 
     function flagWith(obj, extra) {
@@ -170,6 +171,12 @@ $(function() {
     return str.slice(0, 1).toUpperCase() + str.slice(1);
   }
 });
+
+function serializeGridEventData(evt) {
+  return {
+    id: evt.node && evt.node.id
+  }
+}
 
 function gridApi(selector) {
   return $(selector).data('grid').gridOptions.api;
