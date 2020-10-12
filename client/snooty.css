@@ -1,0 +1,4 @@
+.bootstrap-autocomplete.dropdown-menu {
+  max-height: 450px;
+  overflow-y: auto;
+}
