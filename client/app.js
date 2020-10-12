@@ -139,6 +139,15 @@ $(function() {
   function processEvent(kind, evt) {
     const $el = $(this);
 
+
+    // FIXME: workaround for grid
+    // Don't process rowClicked event if original event's target has
+    // data-click callback registered
+    if (kind === 'rowClicked' &&
+        $(evt.event.target).closest('[data-click]').length) {
+      return;
+    }
+
     const key = `on${capitalize(kind)}`;
     const handler = $el.data(key);
     flagWith(handler, handler.with);
