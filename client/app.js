@@ -16,6 +16,8 @@ $(function() {
     }
   });
 
+  attachInputBehaviours();
+
   // Handle file uploads
 
   $('input[type=file]').on('change', e => {
@@ -178,6 +180,28 @@ $(function() {
     if (!str) return str;
 
     return str.slice(0, 1).toUpperCase() + str.slice(1);
+  }
+
+  function attachInputBehaviours() {
+    $(document).on('click', '[data-behaviour=input-clear]', clearInput);
+
+    function clearInput(evt) {
+      const $this = $(this);
+      const related = $this.data('related');
+
+      if (!related) {
+        /**
+         * FIXME: perhaps implement a fallback based on default markup
+         * produced by builder?
+         */
+        return;
+      }
+
+      const clearTarget = $(`#${related}`);
+
+      clearTarget.val('');
+      // FIXME: Should I fire a change event here?
+    }
   }
 });
 

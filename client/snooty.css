@@ -1,4 +1,15 @@
+/* Limit height of autocomplete popups and enable scroll for big LoVs */
 .bootstrap-autocomplete.dropdown-menu {
   max-height: 450px;
   overflow-y: auto;
 }
+
+/* Remove "x" from input[type=search] fields in Chrome/opera
+ * Source: https://geektnt.com/how-to-remove-x-from-search-input-field-on-chrome-and-ie.html
+ */
+input[type=text]::-ms-clear {  display: none; width : 0; height: 0; }
+input[type=text]::-ms-reveal {  display: none; width : 0; height: 0; }
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none; }
