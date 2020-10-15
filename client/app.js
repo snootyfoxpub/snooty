@@ -363,7 +363,7 @@ function processCallback(name, data) {
             show: true
           });
           break;
-        case 'hideModal': $('#modalWindow').modal('hide');
+        case 'hideModal': $('#modalWindow').modal('hide'); break;
         case 'file':
           var blob = b64toBlob(attributes.data, attributes.contentType);
           var link = document.createElement('a');
