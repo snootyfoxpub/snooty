@@ -199,8 +199,12 @@ $(function() {
 
       const clearTarget = $(`#${related}`);
 
-      clearTarget.val('');
-      // FIXME: Should I fire a change event here?
+      if (clearTarget.is('[data-behaviour=autocomplete]')) {
+        clearTarget.autoComplete('set', { value: '', text: '' });
+      } else {
+        clearTarget.val('');
+      }
+      clearTarget.change();
     }
   }
 });
