@@ -343,6 +343,8 @@ function processCallback(name, data) {
   function processAnswer(actions) {
     if (typeof actions !== 'object') return;
 
+    var focusedId = $(document.activeElement).attr('id');
+
     actions.forEach(({ command, attributes }) => {
       switch (command) {
         case 'dom': domAction(attributes); break;
@@ -368,6 +370,8 @@ function processCallback(name, data) {
           break;
       }
     });
+
+    if (focusedId) $('#' + focusedId).focus();
   };
 }
 
