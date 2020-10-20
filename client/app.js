@@ -222,7 +222,10 @@ $(function() {
     function requestConfirmation(evt) {
       // TODO: replace with custom confirmation that replaces the original
       // button with 'Please confirm: [Button] [Cancel]' template
-      if (!confirm('Вы уверены?')) return false;
+      if (!confirm('Вы уверены?')) {
+        evt.stopImmediatePropagation();
+        return false;
+      }
     }
   }
 });
