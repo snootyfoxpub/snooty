@@ -150,6 +150,14 @@ $(function() {
       return;
     }
 
+    // FIXME: workaround for autocomplete
+    if (kind === 'change' && $el.data('autoComplete')) {
+      const autocomp = $el.data('autoComplete');
+
+      // Prevent actions while selection list is shown
+      if (autocomp._dd.shown) return;
+    }
+
     const key = `on${capitalize(kind)}`;
     const handler = $el.data(key);
     flagWith(handler, handler.with);
