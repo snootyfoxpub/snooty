@@ -2,6 +2,9 @@ $(function() {
   // Set default language for datepicker
   $.fn.datepicker.defaults.language = 'ru';
 
+  // Initializing behaviours before listeners so that confirmed behaviour has
+  // chance to cancel click handler
+  attachBehaviours();
   attachListeners('change', 'click');
 
   $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
@@ -16,7 +19,6 @@ $(function() {
     }
   });
 
-  attachInputBehaviours();
 
   // Handle file uploads
 
@@ -190,8 +192,10 @@ $(function() {
     return str.slice(0, 1).toUpperCase() + str.slice(1);
   }
 
-  function attachInputBehaviours() {
-    $(document).on('click', '[data-behaviour=input-clear]', clearInput);
+  function attachBehaviours() {
+    $(document)
+      .on('click', '[data-behaviour=confirmed]', requestConfirmation)
+      .on('click', '[data-behaviour=input-clear]', clearInput);
 
     function clearInput(evt) {
       const $this = $(this);
@@ -213,6 +217,12 @@ $(function() {
         clearTarget.val('');
       }
       clearTarget.change();
+    }
+
+    function requestConfirmation(evt) {
+      // TODO: replace with custom confirmation that replaces the original
+      // button with 'Please confirm: [Button] [Cancel]' template
+      if (!confirm('Вы уверены?')) return false;
     }
   }
 });
