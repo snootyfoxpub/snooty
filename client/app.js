@@ -6,25 +6,7 @@ $(function() {
   // chance to cancel click handler
   attachBehaviours();
   attachListeners('change', 'click');
-
-  $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
-
-  // Handle Enter button modal form
-  // TODO: add support for multiple modal forms
-  // TODO: add support outside of modal form
-  $('#modalWindow').on('keypress', e => {
-    if (e.which == 13) {
-      $('[default]').trigger('click');
-      e.stopPropagation();
-    }
-  });
-
-  $('#modalWindow').on('hidden.bs.modal', function () {
-    $('#modalTitle').html('');
-    $('#modalBody').html('');
-    $('#modalFooter').html('');
-  });
-
+  //
   // Handle file uploads
 
   $('input[type=file]').on('change', e => {
@@ -356,10 +338,32 @@ function serializeInputs() {
 }
 
 const Modal = (function() {
+  jQuery(initialize);
+
   return {
     show: showModal,
     hide: hideModal
   };
+
+  function initialize($) {
+    $('#modalClose').on('click', hideModal);
+
+    // Handle Enter button modal form
+    // TODO: add support for multiple modal forms
+    // TODO: add support outside of modal form
+    $('#modalWindow').on('keypress', e => {
+      if (e.which == 13) {
+        $('[default]').trigger('click');
+        e.stopPropagation();
+      }
+    });
+
+    $('#modalWindow').on('hidden.bs.modal', function () {
+      $('#modalTitle').html('');
+      $('#modalBody').html('');
+      $('#modalFooter').html('');
+    });
+  }
 
   function showModal(attributes) {
     $('#modalTitle').html(attributes.title);
