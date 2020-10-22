@@ -338,46 +338,71 @@ function serializeInputs() {
 }
 
 const Modal = (function() {
-  jQuery(initialize);
+  const $ = jQuery;
+
+  const template = document.querySelector('#modalWindow').outerHTML;
 
   return {
     show: showModal,
-    hide: hideModal
+    hide: hideModal,
+    initialize,
+    stack: {}
   };
 
-  function initialize($) {
-    $('.close').on('click', hideModal);
+  function initialize(id) {
+    const el = $(template.replace('modalWindow', id));
+    const modal = {
+      root: el,
+      close: el.find('.close'),
+      title: el.find('.modal-title'),
+      body: el.find('.modal-body'),
+      footer: el.find('.modal-footer')
+    };
+
+    modal.close.on('click', () => hideModal(id));
 
     // Handle Enter button modal form
     // TODO: add support for multiple modal forms
     // TODO: add support outside of modal form
-    $('.modal').on('keypress', e => {
-      if (e.which == 13) {
-        $('[default]').trigger('click');
-        e.stopPropagation();
-      }
-    });
+    el
+      .on('keypress', e => {
+        if (e.which == 13) {
+          $('[default]').trigger('click');
+          e.stopPropagation();
+        }
+      })
+      .on('hidden.bs.modal', function () {
+        modal.title.html('');
+        modal.body.html('');
+        modal.footer.html('');
+        modal.root.remove();
 
-    $('#modalWindow').on('hidden.bs.modal', function () {
-      $('.modal-title').html('');
-      $('.modal-body').html('');
-      $('.modal-footer').html('');
-    });
+        delete Modal.stack[id];
+      })
+      .appendTo($('#modals'));
+
+    return (Modal.stack[id] = modal);
   }
 
   function showModal(attributes) {
-    $('.modal-title').html(attributes.title);
-    $('.modal-body').html(attributes.body);
-    $('.modal-footer').html(attributes.footer);
-    $('#modalWindow').modal({
-      backdrop: 'static',
-      show: true
-    });
+    const { id, title, body, footer } = attributes;
+    const isNew = !(id in Modal.stack);
 
+    const modal = isNew ? Modal.initialize(id) : Modal.stack[id] ;
+
+    modal.title.html(title);
+    modal.body.html(body);
+    modal.footer.html(footer);
+
+    if (isNew) modal.root.modal({ backdrop: 'static', show: true });
   }
 
-  function hideModal() {
-    $('#modalWindow').modal('hide');
+  function hideModal(id) {
+    const modal = Modal.stack[id];
+
+    if (!modal) return;
+
+    modal.root.modal('hide');
   }
 }());
 
