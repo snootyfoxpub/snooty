@@ -346,12 +346,12 @@ const Modal = (function() {
   };
 
   function initialize($) {
-    $('#modalClose').on('click', hideModal);
+    $('.close').on('click', hideModal);
 
     // Handle Enter button modal form
     // TODO: add support for multiple modal forms
     // TODO: add support outside of modal form
-    $('#modalWindow').on('keypress', e => {
+    $('.modal').on('keypress', e => {
       if (e.which == 13) {
         $('[default]').trigger('click');
         e.stopPropagation();
@@ -359,16 +359,16 @@ const Modal = (function() {
     });
 
     $('#modalWindow').on('hidden.bs.modal', function () {
-      $('#modalTitle').html('');
-      $('#modalBody').html('');
-      $('#modalFooter').html('');
+      $('.modal-title').html('');
+      $('.modal-body').html('');
+      $('.modal-footer').html('');
     });
   }
 
   function showModal(attributes) {
-    $('#modalTitle').html(attributes.title);
-    $('#modalBody').html(attributes.body);
-    $('#modalFooter').html(attributes.footer);
+    $('.modal-title').html(attributes.title);
+    $('.modal-body').html(attributes.body);
+    $('.modal-footer').html(attributes.footer);
     $('#modalWindow').modal({
       backdrop: 'static',
       show: true
