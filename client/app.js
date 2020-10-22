@@ -6,25 +6,7 @@ $(function() {
   // chance to cancel click handler
   attachBehaviours();
   attachListeners('change', 'click');
-
-  $('#modalClose').on('click', () => $('#modalWindow').modal('hide'));
-
-  // Handle Enter button modal form
-  // TODO: add support for multiple modal forms
-  // TODO: add support outside of modal form
-  $('#modalWindow').on('keypress', e => {
-    if (e.which == 13) {
-      $('[default]').trigger('click');
-      e.stopPropagation();
-    }
-  });
-
-  $('#modalWindow').on('hidden.bs.modal', function () {
-    $('#modalTitle').html('');
-    $('#modalBody').html('');
-    $('#modalFooter').html('');
-  });
-
+  //
   // Handle file uploads
 
   $('input[type=file]').on('change', e => {
@@ -355,8 +337,87 @@ function serializeInputs() {
   return inputs;
 }
 
+const Modal = (function() {
+  const $ = jQuery;
+
+  const template = document.querySelector('#modalWindow').outerHTML;
+
+  return {
+    show: showModal,
+    hide: hideModal,
+    initialize,
+    stack: {}
+  };
+
+  function initialize(id) {
+    const el = $(template.replace('modalWindow', id));
+    const modal = {
+      root: el,
+      close: el.find('.close'),
+      title: el.find('.modal-title'),
+      body: el.find('.modal-body'),
+      footer: el.find('.modal-footer')
+    };
+
+    modal.close.on('click', () => hideModal(id));
+
+    // Handle Enter button modal form
+    // TODO: add support for multiple modal forms
+    // TODO: add support outside of modal form
+    el
+      .on('keypress', e => {
+        if (e.which == 13) {
+          $('[default]').trigger('click');
+          e.stopPropagation();
+        }
+      })
+      .on('hidden.bs.modal', function () {
+        modal.title.html('');
+        modal.body.html('');
+        modal.footer.html('');
+        modal.root.remove();
+
+        delete Modal.stack[id];
+      })
+      .appendTo($('#modals'));
+
+    return (Modal.stack[id] = modal);
+  }
+
+  function showModal(attributes) {
+    const { id, title, body, footer } = attributes;
+    const isNew = !(id in Modal.stack);
+
+    const modal = isNew ? Modal.initialize(id) : Modal.stack[id] ;
+
+    modal.title.html(title);
+    modal.body.html(body);
+    modal.footer.html(footer);
+
+    if (isNew) modal.root.modal({ backdrop: 'static', show: true });
+  }
+
+  function hideModal(id) {
+    const modal = Modal.stack[id];
+
+    if (!modal) return;
+
+    modal.root.modal('hide');
+  }
+}());
+
 function processCallback(name, data) {
   const path = window.location.pathname + '/callback/' + name;
+
+
+  const commands = {
+    dom: domAction,
+    exec: ({ code }) => eval(code),
+    file: downloadFile,
+    refresh: () => location.reload(),
+    showModal: Modal.show,
+    hideModal: Modal.hide,
+  }
 
   $.ajax({
       type: "POST",
@@ -373,38 +434,24 @@ function processCallback(name, data) {
   function processAnswer(actions) {
     if (typeof actions !== 'object') return;
 
+    // TODO: also keep a selectionRange to restore cursor position
     var focusedId = $(document.activeElement).attr('id');
 
     actions.forEach(({ command, attributes }) => {
-      switch (command) {
-        case 'dom': domAction(attributes); break;
-        case 'exec': eval(attributes.code); break;
-        case 'refresh': location.reload(); break;
-        case 'showModal':
-          $('#modalTitle').html(attributes.title);
-          $('#modalBody').html(attributes.body);
-          $('#modalFooter').html(attributes.footer);
-          $('#modalWindow').modal({
-            backdrop: 'static',
-            show: true
-          });
-          break;
-        case 'hideModal':
-          $('#modalWindow').modal('hide');
-          break;
-        case 'file':
-          var blob = b64toBlob(attributes.data, attributes.contentType);
-          var link = document.createElement('a');
-
-          link.href = window.URL.createObjectURL(blob);
-          link.download = attributes.name;
-          link.click();
-          break;
-      }
+      if (command in commands) commands[command](attributes);
     });
 
     if (focusedId) $('#' + focusedId).focus();
   };
+
+  function downloadFile(attributes) {
+    var blob = b64toBlob(attributes.data, attributes.contentType);
+    var link = document.createElement('a');
+
+    link.href = window.URL.createObjectURL(blob);
+    link.download = attributes.name;
+    link.click();
+  }
 }
 
 function domAction({ method, selector, body }) {

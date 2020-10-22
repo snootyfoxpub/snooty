@@ -25,3 +25,59 @@ small.text-muted + .invalid-feedback {
   display: block;
   color: inherit;
 }
+
+/* Allow up to 10 modals in stack */
+.modal-backdrop.show:nth-of-type(2) {
+    z-index: 1051 !important;
+}
+.modal:nth-of-type(2) {
+    z-index: 1052 !important;
+}
+.modal-backdrop.show:nth-of-type(3) {
+    z-index: 1053 !important;
+}
+.modal:nth-of-type(3) {
+  z-index: 1054 !important;
+}
+.modal-backdrop.show:nth-of-type(4) {
+    z-index: 1055 !important;
+}
+.modal:nth-of-type(4) {
+    z-index: 1056 !important;
+}
+.modal-backdrop.show:nth-of-type(5) {
+    z-index: 1057 !important;
+}
+.modal:nth-of-type(5) {
+    z-index: 1058 !important;
+}
+.modal-backdrop.show:nth-of-type(6) {
+    z-index: 1059 !important;
+}
+.modal:nth-of-type(6) {
+    z-index: 1060 !important;
+}
+.modal-backdrop.show:nth-of-type(7) {
+    z-index: 1061 !important;
+}
+.modal:nth-of-type(7) {
+    z-index: 1062 !important;
+}
+.modal-backdrop.show:nth-of-type(8) {
+    z-index: 1063 !important;
+}
+.modal:nth-of-type(8) {
+    z-index: 1064 !important;
+}
+.modal-backdrop.show:nth-of-type(9) {
+    z-index: 1065 !important;
+}
+.modal:nth-of-type(9) {
+    z-index: 1066 !important;
+}
+.modal-backdrop.show:nth-of-type(10) {
+    z-index: 1067 !important;
+}
+.modal:nth-of-type(10) {
+    z-index: 1068 !important;
+}
