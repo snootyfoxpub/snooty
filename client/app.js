@@ -355,8 +355,40 @@ function serializeInputs() {
   return inputs;
 }
 
+const Modal = (function() {
+  return {
+    show: showModal,
+    hide: hideModal
+  };
+
+  function showModal(attributes) {
+    $('#modalTitle').html(attributes.title);
+    $('#modalBody').html(attributes.body);
+    $('#modalFooter').html(attributes.footer);
+    $('#modalWindow').modal({
+      backdrop: 'static',
+      show: true
+    });
+
+  }
+
+  function hideModal() {
+    $('#modalWindow').modal('hide');
+  }
+}());
+
 function processCallback(name, data) {
   const path = window.location.pathname + '/callback/' + name;
+
+
+  const commands = {
+    dom: domAction,
+    exec: ({ code }) => eval(code),
+    file: downloadFile,
+    refresh: () => location.reload(),
+    showModal: Modal.show,
+    hideModal: Modal.hide,
+  }
 
   $.ajax({
       type: "POST",
@@ -373,38 +405,24 @@ function processCallback(name, data) {
   function processAnswer(actions) {
     if (typeof actions !== 'object') return;
 
+    // TODO: also keep a selectionRange to restore cursor position
     var focusedId = $(document.activeElement).attr('id');
 
     actions.forEach(({ command, attributes }) => {
-      switch (command) {
-        case 'dom': domAction(attributes); break;
-        case 'exec': eval(attributes.code); break;
-        case 'refresh': location.reload(); break;
-        case 'showModal':
-          $('#modalTitle').html(attributes.title);
-          $('#modalBody').html(attributes.body);
-          $('#modalFooter').html(attributes.footer);
-          $('#modalWindow').modal({
-            backdrop: 'static',
-            show: true
-          });
-          break;
-        case 'hideModal':
-          $('#modalWindow').modal('hide');
-          break;
-        case 'file':
-          var blob = b64toBlob(attributes.data, attributes.contentType);
-          var link = document.createElement('a');
-
-          link.href = window.URL.createObjectURL(blob);
-          link.download = attributes.name;
-          link.click();
-          break;
-      }
+      if (command in commands) commands[command](attributes);
     });
 
     if (focusedId) $('#' + focusedId).focus();
   };
+
+  function downloadFile(attributes) {
+    var blob = b64toBlob(attributes.data, attributes.contentType);
+    var link = document.createElement('a');
+
+    link.href = window.URL.createObjectURL(blob);
+    link.download = attributes.name;
+    link.click();
+  }
 }
 
 function domAction({ method, selector, body }) {
