@@ -9,7 +9,12 @@ $(function() {
   //
   // Handle file uploads
 
-  $('input[type=file]').on('change', e => {
+  $(document).on('change', 'input[type=file]', uploadFiles);
+
+  animateAutocompletes();
+  $('[data-grid]').each((i, el) => attachGrid(el));
+
+  function uploadFiles(e) {
     const el = $(e.target);
     const name = el.prop('name')
     const files = el.prop('files');
@@ -32,10 +37,7 @@ $(function() {
           $('#' + name + '-label').html('Загружено файлов: ' + files.length);
         }
     });
-  });
-
-  animateAutocompletes();
-  $('[data-grid]').each((i, el) => attachGrid(el));
+  }
 
   function attachGrid(gridDiv) {
     let datasource = gridDiv.dataset.gridSource;
