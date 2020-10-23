@@ -322,6 +322,7 @@ function serializeInputs() {
     const name = el.getAttribute('name');
 
     if (!name) return;
+    if (el.disabled) return;
     if (['checkbox', 'radio'].includes(type) && !el.checked) return;
 
     const parts = name.split('.');
