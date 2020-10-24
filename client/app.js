@@ -198,6 +198,8 @@ $(function() {
 
       const clearTarget = $(`#${related}`);
 
+      if (clearTarget.is(':disabled')) return;
+
       if (clearTarget.is('[data-behaviour=autocomplete]')) {
         clearTarget.autoComplete('set', { value: '', text: '' });
       } else {
