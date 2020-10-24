@@ -182,7 +182,8 @@ $(function() {
   function attachBehaviours() {
     $(document)
       .on('click', '[data-behaviour=confirmed]', requestConfirmation)
-      .on('click', '[data-behaviour=input-clear]', clearInput);
+      .on('click', '[data-behaviour=input-clear]', clearInput)
+      .on('click', '[data-behaviour=summon-form]', summon);
 
     function clearInput(evt) {
       const $this = $(this);
@@ -215,6 +216,38 @@ $(function() {
         evt.stopImmediatePropagation();
         return false;
       }
+    }
+
+    function summon(evt) {
+      const $this = $(this);
+      const related = $this.data('related');
+      const [formName, action] = $this.data('summon');
+
+      if (!related) {
+        /**
+         * FIXME: perhaps implement a fallback based on default markup
+         * produced by builder?
+         */
+        return;
+      }
+
+      const origin = $(`#${related}`);
+      if (action !== 'show' && origin.is(':disabled')) {
+        return;
+      }
+
+      const id = origin.data('autoComplete')
+        ? origin.next(':hidden').val()
+        : origin.val();
+
+      // TODO: serialize inputs; get id of related object if needed
+      const data = { inputs: serializeInputs(), data: {} };
+      if (action === 'show') {
+        if (!id) return;
+
+        data.data.id = id;
+      }
+      processCallback(`${formName}Show`, data);
     }
   }
 });
