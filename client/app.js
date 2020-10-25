@@ -149,34 +149,10 @@ $(function() {
 
     const key = `on${capitalize(kind)}`;
     const handler = $el.data(key);
-    flagWith(handler, handler.with);
-
-    const data = handler.data || {};
     const origin = $el.attr('id');
     const gridEvent = evt.api && serializeGridEventData(evt);
-    const context = handler.withContext ? $('body').data('context') : {}
-    const inputs = handler.withInputs ? serializeInputs() : {};
-    const grids = handler.withGrids ? serializeGrids() : {};
 
-    return processCallback(handler.callback, {
-      data, grids, inputs, context, origin, gridEvent
-    });
-
-    function flagWith(obj, extra) {
-      // With is a reserved word
-      if (!extra) return;
-      if (typeof extra === 'string') extra = extra.split(/,\s*/);
-
-      extra.forEach(flag => (obj[`with${capitalize(flag)}`] = true));
-
-      return obj;
-    }
-  }
-
-  function capitalize(str) {
-    if (!str) return str;
-
-    return str.slice(0, 1).toUpperCase() + str.slice(1);
+    invokeCallback(handler, { origin, gridEvent });
   }
 
   function attachBehaviours() {
@@ -436,6 +412,30 @@ const Modal = (function() {
   }
 }());
 
+function invokeCallback(handler, opts) {
+  flagWith(handler, handler.with);
+
+  const data = handler.data || {};
+  const context = handler.withContext ? $('body').data('context') : {}
+  const inputs = handler.withInputs ? serializeInputs() : {};
+  const grids = handler.withGrids ? serializeGrids() : {};
+
+  return processCallback(handler.callback, {
+    ...opts,
+    data, grids, inputs, context
+  });
+
+  function flagWith(obj, extra) {
+    // With is a reserved word
+    if (!extra) return;
+    if (typeof extra === 'string') extra = extra.split(/,\s*/);
+
+    extra.forEach(flag => (obj[`with${capitalize(flag)}`] = true));
+
+    return obj;
+  }
+}
+
 function processCallback(name, data) {
   const path = window.location.pathname + '/callback/' + name;
 
@@ -482,6 +482,12 @@ function processCallback(name, data) {
     link.download = attributes.name;
     link.click();
   }
+}
+
+function capitalize(str) {
+  if (!str) return str;
+
+  return str.slice(0, 1).toUpperCase() + str.slice(1);
 }
 
 function domAction({ method, selector, body }) {
