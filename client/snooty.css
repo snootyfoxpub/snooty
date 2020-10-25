@@ -21,6 +21,7 @@ small.text-muted + .invalid-feedback {
 }
 
 .is-invalid ~ small.text-muted + .invalid-feedback::before { content: ' — '; }
+.is-invalid ~ small.text-muted + .invalid-feedback:empty::before { content: ''; }
 .alert > .invalid-feedback {
   display: block;
   color: inherit;
