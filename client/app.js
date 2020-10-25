@@ -220,34 +220,28 @@ $(function() {
 
     function summon(evt) {
       const $this = $(this);
+      const opts = $this.data('summon');
+      const { action } = opts;
       const related = $this.data('related');
-      const [formName, action] = $this.data('summon');
-
-      if (!related) {
-        /**
-         * FIXME: perhaps implement a fallback based on default markup
-         * produced by builder?
-         */
-        return;
-      }
+      const input = $(`[name='${opts.for}']`);
 
       const origin = $(`#${related}`);
-      if (action !== 'show' && origin.is(':disabled')) {
+      if (action !== 'show' && origin.is(':disabled'))
         return;
-      }
 
-      const id = origin.data('autoComplete')
-        ? origin.next(':hidden').val()
-        : origin.val();
+      const data = { for: opts.for };
 
-      // TODO: serialize inputs; get id of related object if needed
-      const data = { inputs: serializeInputs(), data: {} };
+      const id = input.val();
       if (action === 'show') {
-        if (!id) return;
+        if (id == '') return origin.focus();
 
-        data.data.id = id;
+        data.id = id;
       }
-      processCallback(`${formName}Show`, data);
+
+      processCallback(`${opts.form}Show`, {
+        inputs: serializeInputs(),
+        data
+      });
     }
   }
 });
