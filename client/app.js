@@ -151,40 +151,17 @@ $(function() {
 
     const key = `on${capitalize(kind)}`;
     const handler = $el.data(key);
-    flagWith(handler, handler.with);
-
-    const data = handler.data || {};
     const origin = $el.attr('id');
     const gridEvent = evt.api && serializeGridEventData(evt);
-    const context = handler.withContext ? $('body').data('context') : {}
-    const inputs = handler.withInputs ? serializeInputs() : {};
-    const grids = handler.withGrids ? serializeGrids() : {};
 
-    return processCallback(handler.callback, {
-      data, grids, inputs, context, origin, gridEvent
-    });
-
-    function flagWith(obj, extra) {
-      // With is a reserved word
-      if (!extra) return;
-      if (typeof extra === 'string') extra = extra.split(/,\s*/);
-
-      extra.forEach(flag => (obj[`with${capitalize(flag)}`] = true));
-
-      return obj;
-    }
-  }
-
-  function capitalize(str) {
-    if (!str) return str;
-
-    return str.slice(0, 1).toUpperCase() + str.slice(1);
+    invokeCallback(handler, { origin, gridEvent });
   }
 
   function attachBehaviours() {
     $(document)
       .on('click', '[data-behaviour=confirmed]', requestConfirmation)
-      .on('click', '[data-behaviour=input-clear]', clearInput);
+      .on('click', '[data-behaviour=input-clear]', clearInput)
+      .on('click', '[data-behaviour=summon-form]', summon);
 
     function clearInput(evt) {
       const $this = $(this);
@@ -199,6 +176,8 @@ $(function() {
       }
 
       const clearTarget = $(`#${related}`);
+
+      if (clearTarget.is(':disabled')) return;
 
       if (clearTarget.is('[data-behaviour=autocomplete]')) {
         clearTarget.autoComplete('set', { value: '', text: '' });
@@ -215,6 +194,32 @@ $(function() {
         evt.stopImmediatePropagation();
         return false;
       }
+    }
+
+    function summon(evt) {
+      const $this = $(this);
+      const opts = $this.data('summon');
+      const { action } = opts;
+      const related = $this.data('related');
+      const input = $(`[name='${opts.for}']`);
+
+      const origin = $(`#${related}`);
+      if (action !== 'show' && origin.is(':disabled'))
+        return;
+
+      const data = { for: opts.for };
+
+      const id = input.val();
+      if (action === 'show') {
+        if (id == '') return origin.focus();
+
+        data.id = id;
+      }
+
+      processCallback(`${opts.form}Show`, {
+        inputs: serializeInputs(),
+        data
+      });
     }
   }
 });
@@ -409,6 +414,30 @@ const Modal = (function() {
   }
 }());
 
+function invokeCallback(handler, opts) {
+  flagWith(handler, handler.with);
+
+  const data = handler.data || {};
+  const context = handler.withContext ? $('body').data('context') : {}
+  const inputs = handler.withInputs ? serializeInputs() : {};
+  const grids = handler.withGrids ? serializeGrids() : {};
+
+  return processCallback(handler.callback, {
+    ...opts,
+    data, grids, inputs, context
+  });
+
+  function flagWith(obj, extra) {
+    // With is a reserved word
+    if (!extra) return;
+    if (typeof extra === 'string') extra = extra.split(/,\s*/);
+
+    extra.forEach(flag => (obj[`with${capitalize(flag)}`] = true));
+
+    return obj;
+  }
+}
+
 function processCallback(name, data) {
   const path = window.location.pathname + '/callback/' + name;
 
@@ -455,6 +484,12 @@ function processCallback(name, data) {
     link.download = attributes.name;
     link.click();
   }
+}
+
+function capitalize(str) {
+  if (!str) return str;
+
+  return str.slice(0, 1).toUpperCase() + str.slice(1);
 }
 
 function domAction({ method, selector, body }) {
