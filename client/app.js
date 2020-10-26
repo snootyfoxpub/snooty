@@ -367,7 +367,8 @@ const Modal = (function() {
       footer: el.find('.modal-footer')
     };
 
-    modal.close.on('click', () => hideModal(id));
+    modal.close.on('click',
+      () => invokeCallback({ callback: `${id}Hide`, with: 'inputs' }));
 
     // Handle Enter button modal form
     // TODO: add support for multiple modal forms
