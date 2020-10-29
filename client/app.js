@@ -245,13 +245,20 @@ $(function() {
 
       addSpinner($this, () => icon.hide());
 
+      const clearSpinner = () => removeSpinner($this, () => icon.show());
+      $(document).one('hidden.bs.modal', evt => {
+        const modal = evt.target;
+
+        if(modal.id === opts.form) clearSpinner();
+      });
+
       processCallback(`${opts.form}Show`,
         {
           inputs: serializeInputs(),
           data
         }, {
           failure: (err) => {
-            removeSpinner($this, () => icon.show());
+            clearSpiner();
             alert(err);
           }
         }
