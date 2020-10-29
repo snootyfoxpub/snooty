@@ -244,13 +244,26 @@ $(function() {
     attr({ role: "status", 'aria-hidden': 'true' });
 
   function addSpinner(el, extra) {
-    setTimeout(() => {
+    let timeout = el.data('spinnerTimeout');
+    if (timeout) clearTimeout(timeout);
+
+    timeout = setTimeout(() => {
+      el.data('spinnerTimeout', null);
       el.prop('disabled', true).prepend(spinner)
       extra && extra();
     }, 200);
+    el.data('spinnerTimeout', timeout);
   }
 
   function removeSpinner(el, extra) {
+    const timeout = el.data('spinnerTimeout');
+
+    if (timeout) {
+      clearTimeout(timeout);
+      el.data('spinnerTimeout', null);
+      return;
+    }
+
     el.prop('disabled', false).find('.spinner-border').remove();
     extra && extra();
   }
