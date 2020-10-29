@@ -12,6 +12,26 @@ $(function() {
   // Handle file uploads
 
   $(document).on('change', 'input[type=file]', uploadFiles);
+  $(document).on('autocomplete.dd.shown', function(evt) {
+    const input = $(evt.target);
+    const modal = input.closest('.modal');
+    if (!modal.length) return;
+
+    const dd = input.data('autoComplete')._dd._dd;
+
+    if (dd.parentElement !== document.body) {
+      const $dd = $(dd);
+      const position = $dd.offset();
+      const zIndex = modal.css('zIndex') + 1;
+      $dd.appendTo($('body'))
+        .css({
+          position: 'absolute',
+          left: `${position.left}px`,
+          top: `${position.top}px`,
+          zIndex: zIndex
+        });
+    }
+  });
 
   animateAutocompletes();
   $('[data-grid]').each((i, el) => attachGrid(el));
