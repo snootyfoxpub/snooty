@@ -5,6 +5,8 @@ $(function() {
   // Initializing behaviours before listeners so that confirmed behaviour has
   // chance to cancel click handler
   attachBehaviours();
+  // TODO: preserve selection,
+  // then it will be possible to listen for 'input' event
   attachListeners('change', 'click');
   //
   // Handle file uploads
@@ -387,8 +389,9 @@ const Modal = (function() {
         modal.root.remove();
 
         delete Modal.stack[id];
-      })
-      .appendTo($('#modals'));
+      });
+    // Can't append to  .modals, because backdrop is appended to the end of
+    // body
 
     return (Modal.stack[id] = modal);
   }

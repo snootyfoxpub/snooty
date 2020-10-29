@@ -4,6 +4,16 @@
   overflow-y: auto;
 }
 
+/* Make modal content scrollable */
+.modal-open .modal {
+  overflow-y: hidden;
+}
+.modal-body {
+  overflow-y: auto;
+  height: auto;
+  max-height: 80vh;
+}
+
 /* Remove "x" from input[type=search] fields in Chrome/opera
  * Source: https://geektnt.com/how-to-remove-x-from-search-input-field-on-chrome-and-ie.html
  */
