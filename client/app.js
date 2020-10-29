@@ -134,7 +134,6 @@ $(function() {
   function processEvent(kind, evt) {
     const $el = $(this);
 
-
     // FIXME: workaround for grid
     // Don't process rowClicked event if original event's target has
     // data-click callback registered
@@ -156,7 +155,12 @@ $(function() {
     const origin = $el.attr('id');
     const gridEvent = evt.api && serializeGridEventData(evt);
 
-    invokeCallback(handler, { origin, gridEvent });
+    if (kind === 'click' && $el.is('button,.btn')) {
+      addSpinner($el);
+    }
+
+    invokeCallback(handler, { origin, gridEvent }, {
+      complete: () => removeSpinner($el) });
   }
 
   function attachBehaviours() {
@@ -200,6 +204,7 @@ $(function() {
 
     function summon(evt) {
       const $this = $(this);
+      const icon = $this.find('svg');
       const opts = $this.data('summon');
       const { action } = opts;
       const related = $this.data('related');
@@ -218,11 +223,36 @@ $(function() {
         data.id = id;
       }
 
-      processCallback(`${opts.form}Show`, {
-        inputs: serializeInputs(),
-        data
-      });
+      addSpinner($this, () => icon.hide());
+
+      processCallback(`${opts.form}Show`,
+        {
+          inputs: serializeInputs(),
+          data
+        }, {
+          failure: (err) => {
+            removeSpinner($this, () => icon.show());
+            alert(err);
+          }
+        }
+      );
     }
+  }
+
+  const spinner =  $('<span />').
+    addClass('spinner-border spinner-border-sm').
+    attr({ role: "status", 'aria-hidden': 'true' });
+
+  function addSpinner(el, extra) {
+    setTimeout(() => {
+      el.prop('disabled', true).prepend(spinner)
+      extra && extra();
+    }, 200);
+  }
+
+  function removeSpinner(el, extra) {
+    el.prop('disabled', false).find('.spinner-border').remove();
+    extra && extra();
   }
 });
 
@@ -418,7 +448,7 @@ const Modal = (function() {
   }
 }());
 
-function invokeCallback(handler, opts) {
+function invokeCallback(handler, handlerOpts, callbackOpts) {
   flagWith(handler, handler.with);
 
   const data = handler.data || {};
@@ -427,9 +457,9 @@ function invokeCallback(handler, opts) {
   const grids = handler.withGrids ? serializeGrids() : {};
 
   return processCallback(handler.callback, {
-    ...opts,
+    ...handlerOpts,
     data, grids, inputs, context
-  });
+  }, callbackOpts);
 
   function flagWith(obj, extra) {
     // With is a reserved word
@@ -442,7 +472,7 @@ function invokeCallback(handler, opts) {
   }
 }
 
-function processCallback(name, data) {
+function processCallback(name, data, opts = {}) {
   const path = window.location.pathname + '/callback/' + name;
 
 
@@ -455,16 +485,16 @@ function processCallback(name, data) {
     hideModal: Modal.hide,
   }
 
+  if (!opts.failure) opts.failure = errMsg => alert(errMsg);
+
   $.ajax({
       type: "POST",
       url: path,
       data: JSON.stringify(data),
       contentType: "application/json; charset=utf-8",
       dataType: "json",
-      success: processAnswer,
-      failure: function(errMsg) {
-        alert(errMsg);
-      }
+      ...opts,
+      success: processAnswer
   });
 
   function processAnswer(actions) {
