@@ -476,7 +476,16 @@ const Modal = (function() {
     modal.body.html(body);
     modal.footer.html(footer);
 
-    if (isNew) modal.root.modal({ backdrop: 'static', show: true });
+    if (isNew) {
+      const modals = $('.modals');
+      modal.root.modal({ backdrop: 'static', show: true });
+      $(document).one('shown.bs.modal', () => {
+        // Force modals to be last element of child
+        modals.appendTo($(document.body));
+        $('body > .modal-backdrop').appendTo(modals);
+        modal.root.appendTo(modals);
+      });
+    }
   }
 
   function hideModal(id) {
