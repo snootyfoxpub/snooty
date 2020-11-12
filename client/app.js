@@ -147,11 +147,6 @@ $(function() {
 
   function attachListeners(...evts) {
     evts.forEach(evt => $(document).on(evt, `[data-on-${evt}]`, function(e) {
-      if (e.originalEvent && e.originalEvent.type === e.type) {
-        // looks like jquery-synthesized event, skip it since we should have
-        // processed the original event
-        return;
-      }
       return processEvent.call(this, evt, e);
     }));
   }
