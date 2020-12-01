@@ -41,7 +41,7 @@ $(function() {
     const id = el.attr('id');
     const name = el.prop('name')
     const files = el.prop('files');
-    const label = $(`label[for="${id}"]`);
+    const label = el.next('label') || el.after('<label>');
 
     const fd = new FormData();
     const path = window.location.pathname + '/upload/' + name;
@@ -52,16 +52,21 @@ $(function() {
     fd.append('field', name);
 
     $.ajax({
-        url: path,
-        data: fd,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function (data) {
-          el.attr('uploaded', JSON.stringify(data));
-          label.html('Загружено файлов: ' + files.length);
-        }
+      url: path,
+      data: fd,
+      processData: false,
+      contentType: false,
+      type: 'POST',
+      success: uploadCompleted
     });
+
+    function uploadCompleted(data) {
+      const uploaded = JSON.parse(el.attr('uploaded') || '[]');
+      uploaded.push(...data);
+
+      el.attr('uploaded', JSON.stringify(uploaded));
+      label.html('Загружено файлов: ' + uploaded.length);
+    }
   }
 
   function attachGrid(gridDiv) {
