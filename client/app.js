@@ -38,10 +38,8 @@ $(function() {
 
   function uploadFiles(e) {
     const el = $(e.target);
-    const id = el.attr('id');
     const name = el.prop('name')
     const files = el.prop('files');
-    const label = el.next('label') || el.after('<label>');
 
     const fd = new FormData();
     const path = window.location.pathname + '/upload/' + name;
@@ -63,9 +61,43 @@ $(function() {
     function uploadCompleted(data) {
       const uploaded = JSON.parse(el.attr('uploaded') || '[]');
       uploaded.push(...data);
-
       el.attr('uploaded', JSON.stringify(uploaded));
+
+      let label = el.next('label');
+      if (!label.length) label = $('<label />').insertAfter('<label>');
       label.html('Загружено файлов: ' + uploaded.length);
+
+      const fileList = ensureFileListElement(label);
+
+      data.forEach(file => fileList.append(fileEntry(file)));
+
+      function fileEntry({ filename, originalname }) {
+        const deleteButton = $('<a>').addClass(['btn', 'btn-sm', 'btn-danger', 'ml-2', 'py-0'])
+          .html('&times;')
+          .on('click', e => deleteStaged(e, filename));
+        return $('<li>').addClass('text-nowrap').text(originalname).append(deleteButton);
+      }
+    }
+
+    function ensureFileListElement(anchor) {
+      const customInput = el.closest('.custom-file');
+      if (customInput.length) anchor = customInput;
+
+      const fileList = anchor.next('ul[rel=filelist]');
+      if (fileList.length) return fileList;
+
+      return $('<ul />').addClass('mt-2').attr({ rel: 'filelist' }).insertAfter(anchor);
+
+    }
+
+    function deleteStaged(evt, file) {
+      const deletePath = `${path}/${file}`;
+
+      $.ajax({
+        url: deletePath,
+        type: 'DELETE',
+        success: () => evt.target.closest('li').remove()
+      });
     }
   }
 
