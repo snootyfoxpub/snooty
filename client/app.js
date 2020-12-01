@@ -38,8 +38,11 @@ $(function() {
 
   function uploadFiles(e) {
     const el = $(e.target);
+    const id = el.attr('id');
     const name = el.prop('name')
     const files = el.prop('files');
+    const label = $(`label[for="${id}"]`);
+
     const fd = new FormData();
     const path = window.location.pathname + '/upload/' + name;
 
@@ -56,7 +59,7 @@ $(function() {
         type: 'POST',
         success: function (data) {
           el.attr('uploaded', JSON.stringify(data));
-          $('#' + name + '-label').html('Загружено файлов: ' + files.length);
+          label.html('Загружено файлов: ' + files.length);
         }
     });
   }
