@@ -33,8 +33,8 @@ $(function() {
     }
   });
 
-  animateAutocompletes();
   $('[data-grid]').each((i, el) => attachGrid(el));
+  animateAutocompletes();
 
   function uploadFiles(e) {
     const el = $(e.target);
@@ -391,6 +391,12 @@ function animateAutocompletes() {
       if (node.id) $node = $('#' + node.id);
       else $node = $('[name="' + node.name + '"]:hidden').prev();
     }
+
+    const defaultId = $node.data('id');
+    const defaultText = $node.data('text');
+
+    if (defaultId)
+      $node.autoComplete('set', { value: defaultId, text: defaultText });
 
     $node.on('focus', () => $node.autoComplete('show'));
   }
