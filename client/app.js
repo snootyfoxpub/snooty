@@ -187,6 +187,7 @@ $(function() {
     $(document)
       .on('click', '[data-behaviour=confirmed]', requestConfirmation)
       .on('click', '[data-behaviour=input-clear]', clearInput)
+      .on('click', '[data-behaviour=input-fill]', fillInput)
       .on('click', '[data-behaviour=summon-form]', summon);
 
     function clearInput(evt) {
@@ -211,6 +212,32 @@ $(function() {
         clearTarget.val('');
       }
       clearTarget.change();
+    }
+
+    function fillInput(evt) {
+      const $this = $(this);
+      const related = $this.data('related');
+      const textValue = $this.data('text');
+      const idValue = $this.data('id'); // for autocomplete
+
+      if (!related) {
+        /**
+         * FIXME: perhaps implement a fallback based on default markup
+         * produced by builder?
+         */
+        return;
+      }
+
+      const fillTarget = $(`#${related}`);
+
+      if (fillTarget.is(':disabled')) return;
+
+      if (fillTarget.is('[data-behaviour=autocomplete]')) {
+        fillTarget.autoComplete('set', { value: idValue, text: textValue });
+      } else {
+        fillTarget.val(textValue);
+      }
+      fillTarget.change();
     }
 
     function requestConfirmation(evt) {
