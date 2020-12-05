@@ -50,6 +50,7 @@ $(function() {
     fd.append('field', name);
 
     const progressBar = ensureProgressBarElement();
+    const label = ensureLabelElement();
 
     $.ajax({
       url: path,
@@ -62,13 +63,9 @@ $(function() {
     });
 
     function uploadCompleted(data) {
-      const uploaded = JSON.parse(el.attr('uploaded') || '[]');
+      const uploaded = getUploaded();
       uploaded.push(...data);
-      el.attr('uploaded', JSON.stringify(uploaded));
-
-      let label = el.next('label');
-      if (!label.length) label = $('<label />').insertAfter('<label>');
-      label.html('Загружено файлов: ' + uploaded.length);
+      setUploaded(uploaded);
 
       const fileList = ensureFileListElement(label);
 
@@ -99,14 +96,28 @@ $(function() {
       return $('<progress />').attr({ max: 100, value: 35 }).insertBefore(el);
     }
 
+    function ensureLabelElement() {
+      let label = el.next('label');
+
+      if (!label.length) label = $('<label />').insertAfter(el);
+
+      return label;
+    }
+
     function deleteStaged(evt, file) {
       const deletePath = `${path}/${file}`;
 
       $.ajax({
         url: deletePath,
         type: 'DELETE',
-        success: () => evt.target.closest('li').remove()
+        success: deleteSucceeded
       });
+
+      function deleteSucceeded() {
+        evt.target.closest('li').remove();
+
+        setUploaded(getUploaded().filter(({ filename }) => filename !== file));
+      }
     }
 
     function xhrWithProgress() {
@@ -123,6 +134,16 @@ $(function() {
       xhr.addEventListener("abort", hideProgress, false);
 
       return xhr;
+    }
+
+    function getUploaded() {
+      return JSON.parse(el.attr('uploaded') || '[]');
+    }
+
+    function setUploaded(files) {
+      el.attr('uploaded', JSON.stringify(files));
+
+      label.html('Загружено файлов: ' + files.length);
     }
   }
 
