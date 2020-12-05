@@ -49,13 +49,16 @@ $(function() {
 
     fd.append('field', name);
 
+    const progressBar = ensureProgressBarElement();
+
     $.ajax({
       url: path,
       data: fd,
       processData: false,
       contentType: false,
       type: 'POST',
-      success: uploadCompleted
+      success: uploadCompleted,
+      xhr: xhrWithProgress
     });
 
     function uploadCompleted(data) {
@@ -87,7 +90,13 @@ $(function() {
       if (fileList.length) return fileList;
 
       return $('<ul />').addClass('mt-2').attr({ rel: 'filelist' }).insertAfter(anchor);
+    }
 
+    function ensureProgressBarElement() {
+      const progressBar = el.prev('progress');
+      if (progressBar.length) return progressBar;
+
+      return $('<progress />').attr({ max: 100, value: 35 }).insertBefore(el);
     }
 
     function deleteStaged(evt, file) {
@@ -98,6 +107,22 @@ $(function() {
         type: 'DELETE',
         success: () => evt.target.closest('li').remove()
       });
+    }
+
+    function xhrWithProgress() {
+      // Mostly inspired by https://stackoverflow.com/a/45912983/8759209
+      var xhr = new window.XMLHttpRequest();
+
+      const hideProgress = () => progressBar.hide();
+      const updateProgress = ({ loaded, total }) =>
+        progressBar.show().attr({ value: loaded * 100.0 / total });
+
+      xhr.upload.addEventListener("progress", updateProgress, false);
+      xhr.addEventListener("load", hideProgress, false);
+      xhr.addEventListener("error", hideProgress, false);
+      xhr.addEventListener("abort", hideProgress, false);
+
+      return xhr;
     }
   }
 
