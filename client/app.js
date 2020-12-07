@@ -5,13 +5,16 @@ $(function() {
   // Initializing behaviours before listeners so that confirmed behaviour has
   // chance to cancel click handler
   attachBehaviours();
+
+  // Handle file uploads
+  // Before attachListeners so that we are able to perform upload before the
+  // change listener starts
+  $(document).on('change', 'input[type=file]', uploadFiles);
+
   // TODO: preserve selection,
   // then it will be possible to listen for 'input' event
   attachListeners('change', 'click');
-  //
-  // Handle file uploads
 
-  $(document).on('change', 'input[type=file]', uploadFiles);
   $(document).on('autocomplete.dd.shown', function(evt) {
     const input = $(evt.target);
     const modal = input.closest('.modal');
@@ -52,6 +55,8 @@ $(function() {
     const progressBar = ensureProgressBarElement();
     const label = ensureLabelElement();
 
+    el.data({ processing: true });
+
     $.ajax({
       url: path,
       data: fd,
@@ -59,6 +64,7 @@ $(function() {
       contentType: false,
       type: 'POST',
       success: uploadCompleted,
+      complete: () => el.data({ processing: false }),
       xhr: xhrWithProgress
     });
 
@@ -66,6 +72,12 @@ $(function() {
       const uploaded = getUploaded();
       uploaded.push(...data);
       setUploaded(uploaded);
+
+      if (el.data('onChange')) {
+        el.data({ processing: false });
+        // Invoke on-change listener now
+        return processEvent.call(el, 'change', e);
+      }
 
       const fileList = ensureFileListElement(label);
 
@@ -248,12 +260,17 @@ $(function() {
       return;
     }
 
-    // FIXME: workaround for autocomplete
-    if (kind === 'change' && $el.data('autoComplete')) {
-      const autocomp = $el.data('autoComplete');
+    if (kind === 'change') {
+      // FIXME: workaround for autocomplete
+      if ($el.data('autoComplete')) {
+        const autocomp = $el.data('autoComplete');
 
-      // Prevent actions while selection list is shown
-      if (autocomp._dd.shown) return;
+        // Prevent actions while selection list is shown
+        if (autocomp._dd.shown) return;
+      }
+
+      // Prevent submission on file change to let uploader do its work
+      if ($el.is('input[type=file]') && $el.data('processing')) return;
     }
 
     const key = `on${capitalize(kind)}`;
