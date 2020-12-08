@@ -547,7 +547,11 @@ function serializeInputs() {
       pos = pos[key] = pos[key] || {};
     });
 
-    pos[field] = type === 'file' ? el.getAttribute('uploaded') : el.value;
+    const value = type === 'file'
+      ? JSON.parse(el.getAttribute('uploaded') || [])
+      : el.value;
+
+    pos[field] = value
   });
 
   return inputs;
