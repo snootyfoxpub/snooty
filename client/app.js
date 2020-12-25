@@ -210,6 +210,7 @@ $(function() {
                 start: params.startRow,
                 end: params.endRow,
                 sort: params.sortModel,
+                filters: params.filterModel,
                 inputs: serializeInputs()
               }
             }),
