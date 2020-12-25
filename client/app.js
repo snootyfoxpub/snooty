@@ -548,7 +548,7 @@ function serializeInputs() {
     });
 
     const value = type === 'file'
-      ? JSON.parse(el.getAttribute('uploaded') || [])
+      ? JSON.parse(el.getAttribute('uploaded') || '[]')
       : el.value;
 
     pos[field] = value
